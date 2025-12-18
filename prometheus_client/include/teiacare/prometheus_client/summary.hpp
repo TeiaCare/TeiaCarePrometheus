@@ -11,12 +11,26 @@
 
 namespace tc::prometheus
 {
+/**
+ * @brief Summary metric for calculating quantiles over a sliding window.
+ *
+ * Summaries track observations and calculate quantiles (e.g., median, 95th percentile).
+ * Unlike histograms, quantiles are calculated on the client side.
+ *
+ * Thread-safety:
+ * - All methods are thread-safe and can be called from multiple threads simultaneously
+ * - observe() uses mutex protection for the observation list
+ * - Observations are automatically pruned when exceeding max_observations (default 10000)
+ *
+ * Note: For high-throughput scenarios, consider using histogram instead as it's more efficient.
+ */
 class summary : public tc::prometheus::base_metric
 {
 public:
     explicit summary(std::string name,
                      tc::prometheus::labels labels = {},
-                     std::vector<double> quantiles = default_quantiles());
+                     std::vector<double> quantiles = default_quantiles(),
+                     size_t max_observations = 10000);
 
     void observe(double value);
     std::vector<double> sorted_observations() const;
@@ -29,6 +43,7 @@ public:
 private:
     std::vector<double> _observations;
     std::vector<double> _quantiles;
+    size_t _max_observations;
     mutable std::mutex _mutex;
     std::atomic<uint64_t> _total_count{0};
     std::atomic<double> _total_sum{0.0};

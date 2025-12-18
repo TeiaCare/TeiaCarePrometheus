@@ -20,12 +20,6 @@ class base_metric_serializer
 public:
     virtual ~base_metric_serializer() = default;
 
-    // // Called once per MetricFamily, before visiting its instances
-    // virtual void serialize_family(const std::string& name,
-    //                           const std::string& help,
-    //                           tc::prometheus::metric_type type,
-    //                           const std::vector<std::shared_ptr<tc::prometheus::base_metric>>& metrics) = 0;
-
     virtual void serialize(const tc::prometheus::base_metric_family& metric_family) = 0;
     virtual void serialize(const tc::prometheus::counter& counter) = 0;
     virtual void serialize(const tc::prometheus::gauge& gauge) = 0;

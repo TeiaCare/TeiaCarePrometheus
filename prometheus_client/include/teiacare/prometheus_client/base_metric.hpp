@@ -25,7 +25,4 @@ protected:
     const tc::prometheus::labels _labels;
 };
 
-template <typename T>
-concept MetricTraits = std::is_base_of_v<tc::prometheus::base_metric, T>;
-
 }

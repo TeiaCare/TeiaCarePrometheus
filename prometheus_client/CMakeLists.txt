@@ -15,7 +15,6 @@ set(TARGET_HEADERS
     include/teiacare/prometheus_client/gauge.hpp
     include/teiacare/prometheus_client/histogram.hpp
     include/teiacare/prometheus_client/labels.hpp
-    include/teiacare/prometheus_client/metric_builder.hpp
     include/teiacare/prometheus_client/metric_family.hpp
     include/teiacare/prometheus_client/metric_serializer.hpp
     include/teiacare/prometheus_client/metric_type.hpp
@@ -31,7 +30,6 @@ set(TARGET_SOURCES
     src/gauge.cpp
     src/histogram.cpp
     src/labels.cpp
-    src/metric_builder.cpp
     src/metric_serializer.cpp
     src/registry.cpp
     src/summary.cpp

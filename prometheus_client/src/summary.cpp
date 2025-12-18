@@ -14,9 +14,11 @@ std::vector<double> summary::default_quantiles()
 
 summary::summary(std::string name,
                  tc::prometheus::labels labels,
-                 std::vector<double> quantiles)
+                 std::vector<double> quantiles,
+                 size_t max_observations)
     : tc::prometheus::base_metric(name, labels)
     , _quantiles(std::move(quantiles))
+    , _max_observations(max_observations)
 {
     std::ranges::sort(_quantiles);
 }
@@ -29,9 +31,10 @@ void summary::observe(double value)
     {
         std::scoped_lock lock(_mutex);
         _observations.push_back(value);
-        if (_observations.size() > 10000)
+        if (_observations.size() > _max_observations)
         {
-            _observations.erase(_observations.begin(), _observations.begin() + 5000);
+            // Remove oldest half of observations when limit is reached
+            _observations.erase(_observations.begin(), _observations.begin() + (_max_observations / 2));
         }
     }
 

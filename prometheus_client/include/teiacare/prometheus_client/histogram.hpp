@@ -10,6 +10,17 @@
 
 namespace tc::prometheus
 {
+/**
+ * @brief Histogram metric for sampling observations into buckets.
+ *
+ * Histograms are used to track distributions of values (e.g., request durations, response sizes).
+ * Each observation is counted into configured buckets, allowing calculation of quantiles.
+ *
+ * Thread-safety:
+ * - All methods are thread-safe and can be called from multiple threads simultaneously
+ * - observe() uses atomic operations for lock-free updates
+ * - Serialization is safe to call concurrently with observations
+ */
 class histogram : public tc::prometheus::base_metric
 {
 public:

@@ -9,6 +9,16 @@
 
 namespace tc::prometheus
 {
+/**
+ * @brief Counter metric that can only increase.
+ *
+ * Counters are used for values that only go up (e.g., number of requests, errors).
+ *
+ * Thread-safety:
+ * - All methods are thread-safe and can be called from multiple threads simultaneously
+ * - inc() uses atomic operations for lock-free increments
+ * - get() and serialize() are safe to call while inc() is being called from other threads
+ */
 class counter : public tc::prometheus::base_metric
 {
 public:
