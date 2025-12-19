@@ -5,6 +5,7 @@ Welcome to TeiaCarePrometheus!
 *TeiaCarePrometheus* is a C++ client library that implements the Prometheus Data Model.
 
 [![Docs](https://img.shields.io/badge/Docs-TeiaCarePrometheus-white.svg)](https://teiacare.github.io/TeiaCarePrometheus/)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/239b406eb08444b887ad8acfe4544579)](https://app.codacy.com/gh/TeiaCare/TeiaCarePrometheus/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/239b406eb08444b887ad8acfe4544579)](https://app.codacy.com/gh/TeiaCare/TeiaCarePrometheus/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 ![TeiaCarePrometheus](https://socialify.git.ci/teiacare/teiacareprometheus/image?description=1&font=Raleway&name=1&pattern=Solid&theme=Auto)
