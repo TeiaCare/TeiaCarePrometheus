@@ -12,14 +12,234 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Update these tests to match the new metric_serializer API
-
+#include <teiacare/prometheus_client/counter.hpp>
+#include <teiacare/prometheus_client/gauge.hpp>
+#include <teiacare/prometheus_client/histogram.hpp>
 #include <teiacare/prometheus_client/metric_serializer.hpp>
+#include <teiacare/prometheus_client/registry.hpp>
+#include <teiacare/prometheus_client/summary.hpp>
 
 #include <gtest/gtest.h>
 
-// Placeholder test to ensure the file compiles
-TEST(metric_serializer_test, placeholder)
+class metric_serializer_test : public ::testing::Test
 {
-    EXPECT_TRUE(true);
+protected:
+    void SetUp() override
+    {
+        serializer = std::make_unique<tc::prometheus::metric_serializer>();
+    }
+
+    void TearDown() override
+    {
+        serializer.reset();
+    }
+
+    std::unique_ptr<tc::prometheus::metric_serializer> serializer;
+};
+
+TEST_F(metric_serializer_test, serialize_counter)
+{
+    tc::prometheus::counter counter("test_counter");
+    counter.inc(42);
+
+    serializer->serialize(counter);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("test_counter"), std::string::npos);
+    EXPECT_NE(output.find("42"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_gauge)
+{
+    tc::prometheus::gauge gauge("test_gauge");
+    gauge.set(75.5);
+
+    serializer->serialize(gauge);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("test_gauge"), std::string::npos);
+    EXPECT_NE(output.find("75.5"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_histogram)
+{
+    std::vector<double> buckets = {0.1, 0.5, 1.0, 5.0};
+    tc::prometheus::histogram histogram("test_histogram", tc::prometheus::labels{}, buckets);
+
+    histogram.observe(0.3);
+    histogram.observe(0.7);
+    histogram.observe(2.0);
+
+    serializer->serialize(histogram);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("test_histogram"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_summary)
+{
+    std::vector<double> quantiles = {0.5, 0.9, 0.99};
+    tc::prometheus::summary summary("test_summary", tc::prometheus::labels{}, quantiles);
+
+    for (int i = 1; i <= 100; ++i)
+    {
+        summary.observe(static_cast<double>(i));
+    }
+
+    serializer->serialize(summary);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("test_summary"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_counter_with_labels)
+{
+    tc::prometheus::labels labels;
+    labels.add("method", "GET").add("status", "200");
+
+    tc::prometheus::counter counter("http_requests", labels);
+    counter.inc(100);
+
+    serializer->serialize(counter);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("http_requests"), std::string::npos);
+    EXPECT_NE(output.find("method"), std::string::npos);
+    EXPECT_NE(output.find("GET"), std::string::npos);
+    EXPECT_NE(output.find("status"), std::string::npos);
+    EXPECT_NE(output.find("200"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_gauge_with_labels)
+{
+    tc::prometheus::labels labels;
+    labels.add("cpu", "0").add("mode", "user");
+
+    tc::prometheus::gauge gauge("cpu_usage", labels);
+    gauge.set(85.2);
+
+    serializer->serialize(gauge);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("cpu_usage"), std::string::npos);
+    EXPECT_NE(output.find("cpu"), std::string::npos);
+    EXPECT_NE(output.find("mode"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_metric_family)
+{
+    tc::prometheus::registry registry;
+    auto counter_family = registry.create_counter("family_counter", "Counter family");
+
+    auto counter1 = counter_family->add_metric({{"label", "value1"}});
+    auto counter2 = counter_family->add_metric({{"label", "value2"}});
+
+    counter1->inc(10);
+    counter2->inc(20);
+
+    serializer->serialize(*counter_family);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("family_counter"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_multiple_metrics)
+{
+    tc::prometheus::counter counter("counter_metric");
+    tc::prometheus::gauge gauge("gauge_metric");
+
+    counter.inc(5);
+    gauge.set(10);
+
+    serializer->serialize(counter);
+    serializer->serialize(gauge);
+
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("counter_metric"), std::string::npos);
+    EXPECT_NE(output.find("gauge_metric"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, empty_serializer)
+{
+    std::string output = serializer->str();
+    EXPECT_TRUE(output.empty());
+}
+
+TEST_F(metric_serializer_test, serialize_counter_with_zero_value)
+{
+    tc::prometheus::counter counter("zero_counter");
+    // Don't increment - should remain at 0
+
+    serializer->serialize(counter);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("zero_counter"), std::string::npos);
+    EXPECT_NE(output.find("0"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_gauge_with_negative_value)
+{
+    tc::prometheus::gauge gauge("negative_gauge");
+    gauge.set(-42.5);
+
+    serializer->serialize(gauge);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("negative_gauge"), std::string::npos);
+    EXPECT_NE(output.find("-42.5"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialize_histogram_with_observations)
+{
+    std::vector<double> buckets = {1.0, 2.0, 5.0, 10.0};
+    tc::prometheus::histogram histogram("request_duration", tc::prometheus::labels{}, buckets);
+
+    // Add some observations
+    histogram.observe(0.5);
+    histogram.observe(1.5);
+    histogram.observe(3.0);
+    histogram.observe(7.0);
+    histogram.observe(15.0);
+
+    serializer->serialize(histogram);
+    std::string output = serializer->str();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("request_duration"), std::string::npos);
+    // Should contain sum and count
+    EXPECT_NE(output.find("_sum"), std::string::npos);
+    EXPECT_NE(output.find("_count"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, registry_serialize)
+{
+    tc::prometheus::registry registry;
+
+    auto counter_family = registry.create_counter("http_requests_total", "Total HTTP requests");
+    auto gauge_family = registry.create_gauge("active_connections", "Active connections");
+
+    auto counter = counter_family->add_metric({{"method", "GET"}});
+    auto gauge = gauge_family->add_metric({});
+
+    counter->inc(100);
+    gauge->set(50);
+
+    std::string output = registry.serialize();
+
+    EXPECT_FALSE(output.empty());
+    EXPECT_NE(output.find("http_requests_total"), std::string::npos);
+    EXPECT_NE(output.find("active_connections"), std::string::npos);
+    EXPECT_NE(output.find("100"), std::string::npos);
+    EXPECT_NE(output.find("50"), std::string::npos);
 }
