@@ -131,7 +131,7 @@ const std::string& metric_family<MetricT>::help() const
 template <typename MetricT>
 const std::string& metric_family<MetricT>::type() const
 {
-    static constexpr std::string type = tc::prometheus::metric_type_t<MetricT>;
+    static const std::string type = tc::prometheus::metric_type_t<MetricT>;
     return type;
 }
 

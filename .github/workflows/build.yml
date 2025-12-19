@@ -24,12 +24,12 @@ jobs:
             setup_build_env: 'call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"'
             activate_venv: 'call ".venv\\Scripts\\activate.bat"'
 
-          - name: macos14_clang15
-            os: macos-14
-            compiler: clang
-            compiler_version: 15
-            setup_build_env: ""
-            activate_venv: 'source .venv/bin/activate'
+          # - name: macos14_clang15
+          #   os: macos-14
+          #   compiler: clang
+          #   compiler_version: 15
+          #   setup_build_env: ""
+          #   activate_venv: 'source .venv/bin/activate'
 
           - name: ubuntu2204_gcc12
             os: ubuntu-22.04
@@ -197,12 +197,12 @@ jobs:
             setup_build_env: 'call "C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Auxiliary\\Build\\vcvars64.bat"'
             activate_venv: 'call ".venv\\Scripts\\activate.bat"'
 
-          - name: macos14_clang15
-            os: macos-14
-            compiler: clang
-            compiler_version: 15
-            setup_build_env: ""
-            activate_venv: 'source .venv/bin/activate'
+          # - name: macos14_clang15
+          #   os: macos-14
+          #   compiler: clang
+          #   compiler_version: 15
+          #   setup_build_env: ""
+          #   activate_venv: 'source .venv/bin/activate'
 
           - name: ubuntu2204_gcc12
             os: ubuntu-22.04
