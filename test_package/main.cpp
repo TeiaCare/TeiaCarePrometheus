@@ -18,6 +18,6 @@
 
 int main()
 {
-    std::cout << tc::img::info::name << " v" << tc::img::info::version << std::endl;
+    std::cout << tc::prometheus::info::name << " v" << tc::prometheus::info::version << std::endl;
     return 0;
 }
