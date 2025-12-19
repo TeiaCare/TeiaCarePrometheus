@@ -1,5 +1,6 @@
 #include <teiacare/prometheus_client/counter.hpp>
 #include <teiacare/prometheus_client/gauge.hpp>
+#include <teiacare/prometheus_client/labels.hpp>
 #include <teiacare/prometheus_client/metric_family.hpp>
 #include <teiacare/prometheus_client/registry.hpp>
 

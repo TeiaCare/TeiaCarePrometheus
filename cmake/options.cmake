@@ -6,7 +6,7 @@ set(CMAKE_LINK_WHAT_YOU_USE True)
 set(WINDOWS_EXPORT_ALL_SYMBOLS True)
 set(CONAN_CMAKE_SILENT_OUTPUT True)
 
-option(TC_ENABLE_UNIT_TESTS "Enable Unit Tests" False)
+option(TC_ENABLE_UNIT_TESTS "Enable Unit Tests" True)
 cmake_print_variables(TC_ENABLE_UNIT_TESTS)
 
 option(TC_ENABLE_UNIT_TESTS_COVERAGE "Enable Unit Tests Coverage" False)

@@ -55,8 +55,15 @@ endif()
 # Unit Tests
 if(TC_ENABLE_UNIT_TESTS)
 	set(TARGET_NAME_UNIT_TEST ${TARGET_NAME}_unit_tests)
-    setup_unit_tests(${TARGET_NAME_UNIT_TEST} ${TARGET_NAME}
+    setup_unit_tests(${TARGET_NAME_UNIT_TEST}
         tests/main.cpp
+        tests/test_labels.cpp
+        tests/test_counter.cpp
+        tests/test_gauge.cpp
+        tests/test_histogram.cpp
+        tests/test_summary.cpp
+        tests/test_registry.cpp
+        tests/test_metric_serializer.cpp
     )
 
     if(TC_ENABLE_WARNINGS_ERROR)
