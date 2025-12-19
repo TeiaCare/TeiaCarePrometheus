@@ -18,7 +18,6 @@ set(TARGET_HEADERS
     include/teiacare/prometheus_client/metric_family.hpp
     include/teiacare/prometheus_client/metric_serializer.hpp
     include/teiacare/prometheus_client/metric_type.hpp
-    include/teiacare/prometheus_client/prometheus.hpp
     include/teiacare/prometheus_client/registry.hpp
     include/teiacare/prometheus_client/summary.hpp
     include/teiacare/prometheus_client/version.hpp

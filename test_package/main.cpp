@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <teiacare/prometheus_client/version.hpp>
 
-int main(int argc, char** argv)
+#include <iostream>
+
+int main()
 {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    std::cout << tc::img::info::name << " v" << tc::img::info::version << std::endl;
+    return 0;
 }

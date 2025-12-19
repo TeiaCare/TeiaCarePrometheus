@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
+project(teiacare_prometheus_client_test_package CXX)
+
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/modules)
+find_package(teiacare_prometheus_client CONFIG REQUIRED)
+
+add_executable(teiacare_prometheus_client_test_package main.cpp)
+target_link_libraries(teiacare_prometheus_client_test_package PRIVATE teiacare::prometheus_client)
+target_compile_features(teiacare_prometheus_client_test_package PRIVATE cxx_std_20)
+install(TARGETS teiacare_prometheus_client_test_package DESTINATION .)
