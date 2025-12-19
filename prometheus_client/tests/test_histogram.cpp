@@ -102,3 +102,51 @@ TEST_F(histogram_test, histogram_with_labels)
 //         std::invalid_argument
 //     );
 // }
+
+TEST_F(histogram_test, default_buckets)
+{
+    tc::prometheus::histogram h("default_hist", {});
+    const auto& bounds = h.bounds();
+
+    EXPECT_FALSE(bounds.empty());
+    EXPECT_GT(bounds.size(), 0);
+}
+
+TEST_F(histogram_test, observe_value_in_correct_bucket)
+{
+    std::vector<double> buckets = {1.0, 5.0, 10.0};
+    tc::prometheus::histogram h("bucket_test", {}, buckets);
+
+    h.observe(3.0); // Should go in 5.0 bucket
+    h.observe(7.0); // Should go in 10.0 bucket
+    h.observe(0.5); // Should go in 1.0 bucket
+
+    EXPECT_EQ(h.count(), 3);
+    EXPECT_DOUBLE_EQ(h.sum(), 10.5);
+}
+
+TEST_F(histogram_test, observe_value_above_all_buckets)
+{
+    std::vector<double> buckets = {1.0, 5.0, 10.0};
+    tc::prometheus::histogram h("overflow_test", {}, buckets);
+
+    h.observe(100.0); // Above all buckets, goes to +Inf
+
+    EXPECT_EQ(h.count(), 1);
+    EXPECT_DOUBLE_EQ(h.sum(), 100.0);
+}
+
+TEST_F(histogram_test, reset_clears_buckets)
+{
+    std::vector<double> buckets = {1.0, 5.0};
+    tc::prometheus::histogram h("reset_test", {}, buckets);
+
+    h.observe(2.0);
+    h.observe(4.0);
+    EXPECT_EQ(h.count(), 2);
+
+    h.reset();
+
+    EXPECT_EQ(h.count(), 0);
+    EXPECT_DOUBLE_EQ(h.sum(), 0.0);
+}

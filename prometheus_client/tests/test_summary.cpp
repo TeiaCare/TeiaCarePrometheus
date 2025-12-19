@@ -103,3 +103,62 @@ TEST_F(summary_test, summary_with_labels)
 //         std::invalid_argument
 //     );
 // }
+
+TEST_F(summary_test, default_quantiles)
+{
+    tc::prometheus::summary s("default_summary", {});
+    const auto& quantiles = s.quantiles_list();
+
+    EXPECT_FALSE(quantiles.empty());
+}
+
+TEST_F(summary_test, max_observations_limit)
+{
+    std::vector<double> quantiles = {0.5};
+    tc::prometheus::summary s("limited", {}, quantiles, 10); // Max 10 observations
+
+    // Add more than max observations
+    for (int i = 0; i < 20; ++i)
+    {
+        s.observe(i);
+    }
+
+    // Should not crash and should limit observations
+    EXPECT_EQ(s.count(), 20); // Count should still be accurate
+    auto sorted = s.sorted_observations();
+    EXPECT_LE(sorted.size(), 10); // But stored observations should be limited
+}
+
+TEST_F(summary_test, sorted_observations_are_sorted)
+{
+    std::vector<double> quantiles = {0.5};
+    tc::prometheus::summary s("sorted_test", {}, quantiles);
+
+    s.observe(5.0);
+    s.observe(1.0);
+    s.observe(3.0);
+    s.observe(2.0);
+
+    auto sorted = s.sorted_observations();
+    ASSERT_EQ(sorted.size(), 4);
+    EXPECT_DOUBLE_EQ(sorted[0], 1.0);
+    EXPECT_DOUBLE_EQ(sorted[1], 2.0);
+    EXPECT_DOUBLE_EQ(sorted[2], 3.0);
+    EXPECT_DOUBLE_EQ(sorted[3], 5.0);
+}
+
+TEST_F(summary_test, reset_clears_observations)
+{
+    std::vector<double> quantiles = {0.5};
+    tc::prometheus::summary s("reset_test", {}, quantiles);
+
+    s.observe(1.0);
+    s.observe(2.0);
+    EXPECT_EQ(s.count(), 2);
+
+    s.reset();
+
+    EXPECT_EQ(s.count(), 0);
+    EXPECT_DOUBLE_EQ(s.sum(), 0.0);
+    EXPECT_TRUE(s.sorted_observations().empty());
+}

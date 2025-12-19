@@ -90,3 +90,59 @@ TEST_F(labels_test, labels_with_multiple_values)
     std::string result = labels.to_string();
     EXPECT_FALSE(result.empty());
 }
+
+TEST_F(labels_test, invalid_label_name_starting_with_number_throws)
+{
+    tc::prometheus::labels labels;
+    EXPECT_THROW(labels.add("123invalid", "value"), std::invalid_argument);
+}
+
+TEST_F(labels_test, invalid_label_name_starting_with_double_underscore_throws)
+{
+    tc::prometheus::labels labels;
+    EXPECT_THROW(labels.add("__reserved", "value"), std::invalid_argument);
+}
+
+TEST_F(labels_test, valid_label_name_with_colon)
+{
+    tc::prometheus::labels labels;
+    EXPECT_NO_THROW(labels.add("http:status", "200"));
+    EXPECT_FALSE(labels.empty());
+}
+
+TEST_F(labels_test, label_value_escaping_backslash)
+{
+    tc::prometheus::labels labels;
+    labels.add("path", "C:\\Program Files\\App");
+    std::string result = labels.to_string();
+    EXPECT_NE(result.find("C:\\\\Program Files\\\\App"), std::string::npos);
+}
+
+TEST_F(labels_test, label_value_escaping_newline)
+{
+    tc::prometheus::labels labels;
+    labels.add("message", "Line1\nLine2");
+    std::string result = labels.to_string();
+    EXPECT_NE(result.find("\\n"), std::string::npos);
+}
+
+TEST_F(labels_test, label_value_escaping_quote)
+{
+    tc::prometheus::labels labels;
+    labels.add("quote", "He said \"Hello\"");
+    std::string result = labels.to_string();
+    EXPECT_NE(result.find("\\\""), std::string::npos);
+}
+
+TEST_F(labels_test, cache_invalidation_on_add)
+{
+    tc::prometheus::labels labels;
+    labels.add("key1", "value1");
+    std::string before = labels.to_string();
+
+    labels.add("key2", "value2");
+    std::string after = labels.to_string();
+
+    EXPECT_NE(before, after);
+    EXPECT_GT(after.length(), before.length());
+}

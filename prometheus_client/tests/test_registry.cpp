@@ -187,3 +187,55 @@ TEST_F(registry_test, default_registry)
 
     default_reg.reset();
 }
+
+TEST_F(registry_test, create_duplicate_metric_family_throws)
+{
+    registry->create_counter("duplicate_name", "First counter");
+    EXPECT_THROW(registry->create_counter("duplicate_name", "Second counter"),
+                 std::runtime_error);
+}
+
+TEST_F(registry_test, get_non_existent_metric_throws)
+{
+    auto counter_family = registry->create_counter("test_counter", "Test");
+    counter_family->add_metric({{"label", "value1"}});
+
+    tc::prometheus::labels non_existent;
+    non_existent.add("label", "value2");
+
+    EXPECT_THROW(counter_family->get_metric(non_existent), std::runtime_error);
+}
+
+TEST_F(registry_test, create_histogram_with_custom_buckets)
+{
+    std::vector<double> custom_buckets = {0.01, 0.1, 1.0, 10.0, 100.0};
+    auto histogram_family = registry->create_histogram("custom_hist", "Custom histogram", custom_buckets);
+    auto histogram = histogram_family->add_metric({});
+
+    histogram->observe(0.5);
+    ASSERT_NE(histogram, nullptr);
+    EXPECT_EQ(histogram->count(), 1);
+}
+
+TEST_F(registry_test, create_summary_with_custom_quantiles)
+{
+    std::vector<double> custom_quantiles = {0.25, 0.5, 0.75, 0.95};
+    auto summary_family = registry->create_summary("custom_summary", "Custom summary", custom_quantiles);
+    auto summary = summary_family->add_metric({});
+
+    ASSERT_NE(summary, nullptr);
+    // Note: quantiles parameter is not currently used by create_summary
+    // The summary will use its default quantiles
+    EXPECT_FALSE(summary->quantiles_list().empty());
+}
+
+TEST_F(registry_test, serialize_with_eof_termination)
+{
+    auto counter_family = registry->create_counter("test", "Test");
+    auto counter = counter_family->add_metric({});
+    counter->inc();
+
+    std::string output = registry->serialize();
+    EXPECT_TRUE(output.ends_with("\n"));
+    EXPECT_NE(output.find("# EOF"), std::string::npos);
+}

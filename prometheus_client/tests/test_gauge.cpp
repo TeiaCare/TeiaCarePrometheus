@@ -100,3 +100,36 @@ TEST_F(gauge_test, gauge_with_labels)
     labeled_gauge->set(75.5);
     EXPECT_EQ(labeled_gauge->get(), 75.5);
 }
+
+TEST_F(gauge_test, set_very_large_positive_value)
+{
+    gauge->set(1e15);
+    EXPECT_DOUBLE_EQ(gauge->get(), 1e15);
+}
+
+TEST_F(gauge_test, set_very_large_negative_value)
+{
+    gauge->set(-1e15);
+    EXPECT_DOUBLE_EQ(gauge->get(), -1e15);
+}
+
+TEST_F(gauge_test, reset_after_operations)
+{
+    gauge->set(100);
+    gauge->inc(50);
+    gauge->dec(25);
+    EXPECT_DOUBLE_EQ(gauge->get(), 125.0);
+
+    gauge->reset();
+    EXPECT_DOUBLE_EQ(gauge->get(), 0.0);
+}
+
+TEST_F(gauge_test, gauge_name_and_labels_access)
+{
+    tc::prometheus::labels labels;
+    labels.add("service", "api");
+    tc::prometheus::gauge g("access_test", labels);
+
+    EXPECT_EQ(g.name(), "access_test");
+    EXPECT_EQ(g.labels().to_string(), labels.to_string());
+}

@@ -84,3 +84,26 @@ TEST_F(counter_test, counter_with_labels)
     labeled_counter->inc();
     EXPECT_EQ(labeled_counter->get(), 1.0);
 }
+
+TEST_F(counter_test, increment_by_zero)
+{
+    counter->inc(0.0);
+    EXPECT_DOUBLE_EQ(counter->get(), 0.0);
+}
+
+TEST_F(counter_test, increment_by_large_value)
+{
+    counter->inc(1e10);
+    EXPECT_DOUBLE_EQ(counter->get(), 1e10);
+}
+
+TEST_F(counter_test, counter_name_and_labels_access)
+{
+    tc::prometheus::labels labels;
+    labels.add("env", "production");
+    tc::prometheus::counter c("access_test", labels);
+
+    EXPECT_EQ(c.name(), "access_test");
+    EXPECT_FALSE(c.labels().empty());
+    EXPECT_EQ(c.labels().to_string(), labels.to_string());
+}

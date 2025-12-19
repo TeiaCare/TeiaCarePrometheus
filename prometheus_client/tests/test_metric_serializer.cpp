@@ -243,3 +243,59 @@ TEST_F(metric_serializer_test, registry_serialize)
     EXPECT_NE(output.find("100"), std::string::npos);
     EXPECT_NE(output.find("50"), std::string::npos);
 }
+
+TEST_F(metric_serializer_test, serialization_includes_help_comment)
+{
+    tc::prometheus::registry registry;
+    auto counter_family = registry.create_counter("test_counter", "This is help text");
+    auto counter = counter_family->add_metric({});
+    counter->inc(1);
+
+    std::string output = registry.serialize();
+    EXPECT_NE(output.find("# HELP test_counter This is help text"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, serialization_includes_type_comment)
+{
+    tc::prometheus::registry registry;
+    auto gauge_family = registry.create_gauge("test_gauge", "Gauge help");
+    auto gauge = gauge_family->add_metric({});
+    gauge->set(42);
+
+    std::string output = registry.serialize();
+    EXPECT_NE(output.find("# TYPE test_gauge gauge"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, histogram_serialization_format)
+{
+    tc::prometheus::registry registry;
+    auto hist_family = registry.create_histogram("request_duration", "Request duration", {0.1, 0.5, 1.0});
+    auto hist = hist_family->add_metric({});
+    hist->observe(0.3);
+    hist->observe(0.7);
+
+    std::string output = registry.serialize();
+
+    // Should include bucket, sum, and count metrics
+    EXPECT_NE(output.find("request_duration_bucket"), std::string::npos);
+    EXPECT_NE(output.find("request_duration_sum"), std::string::npos);
+    EXPECT_NE(output.find("request_duration_count"), std::string::npos);
+}
+
+TEST_F(metric_serializer_test, summary_serialization_format)
+{
+    tc::prometheus::registry registry;
+    auto summary_family = registry.create_summary("response_size", "Response size", {0.5, 0.9, 0.99});
+    auto summary = summary_family->add_metric({});
+    for (int i = 1; i <= 10; ++i)
+    {
+        summary->observe(i);
+    }
+
+    std::string output = registry.serialize();
+
+    // Should include sum and count metrics
+    EXPECT_NE(output.find("response_size"), std::string::npos);
+    EXPECT_NE(output.find("response_size_sum"), std::string::npos);
+    EXPECT_NE(output.find("response_size_count"), std::string::npos);
+}
