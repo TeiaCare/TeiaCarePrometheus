@@ -71,3 +71,59 @@ This script configures, builds and installs the library.
 ```bash
 python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION>
 ```
+
+
+## Examples
+
+```bash
+# Build all the examples
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --examples --warnings
+
+# Run all the examples
+python scripts/tools/run_examples.py install/examples
+```
+Examples are installed in $PWD/install/examples.
+
+
+## Unit Tests and Code Coverage
+
+```bash
+# Build Unit Tests with Code Coverage enabled (if supported)
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --coverage --warnings
+
+# Run Unit Tests
+python scripts/tools/run_unit_tests.py <Debug|Release|RelWithDebInfo>
+
+# Run Code Covergae
+python scripts/tools/run_coverage.py <COMPILER_NAME> <COMPILER_VERSION> prometheus_client
+```
+Note that code coverage is not available on Windows.
+
+Unit tests results are available in $PWD/results/unit_tests.
+Coverage results are available in $PWD/results/coverage.
+
+
+## Sanitizers
+
+### Address Sanitizer
+
+```bash
+# Build Unit Tests with Address Sanitizer enabled (if supported)
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --address_sanitizer --unit_tests
+
+# Run Unit Tests with Address Sanitizer
+python scripts/tools/run_sanitizer.py --address_sanitizer install/unit_tests/teiacare_video_io_unit_tests
+```
+Note that Address Sanitizer is supported only on Linux.
+
+
+### Thread Sanitizer
+
+```bash
+# Build Unit Tests with Thread Sanitizer enabled (if supported)
+python scripts/cmake.py <Debug|Release|RelWithDebInfo> <COMPILER_NAME> <COMPILER_VERSION> --thread_sanitizer --unit_tests
+
+# Run Unit Tests with Thread Sanitizer
+python scripts/tools/run_sanitizer.py --thread_sanitizer install/unit_tests/teiacare_video_io_unit_tests
+```
+Note that Thread Sanitizer is supported only on Linux.

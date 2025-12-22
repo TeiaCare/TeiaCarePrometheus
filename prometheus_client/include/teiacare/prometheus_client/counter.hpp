@@ -23,10 +23,12 @@
 
 namespace tc::prometheus
 {
-/**
- * @brief Counter metric that can only increase.
+/*!
+ * \class counter
+ * \brief Counter metric that can only increase.
  *
  * Counters are used for values that only go up (e.g., number of requests, errors).
+ * The value can only be incremented and reset to zero.
  *
  * Thread-safety:
  * - All methods are thread-safe and can be called from multiple threads simultaneously
@@ -36,11 +38,36 @@ namespace tc::prometheus
 class counter : public tc::prometheus::base_metric
 {
 public:
+    /*!
+     * \brief Construct a new counter metric
+     * \param name The counter name
+     * \param labels Optional labels for the counter
+     */
     explicit counter(std::string name, tc::prometheus::labels labels = {});
 
+    /*!
+     * \brief Increment the counter by a given amount
+     * \param amount The amount to increment (default: 1.0)
+     *
+     * The amount must be non-negative. The increment is performed atomically.
+     */
     void inc(double amount = 1.0);
+
+    /*!
+     * \brief Get the current counter value
+     * \return The current counter value
+     */
     double get() const noexcept;
+
+    /*!
+     * \brief Reset the counter to zero
+     */
     void reset() override;
+
+    /*!
+     * \brief Serialize the counter using the provided serializer
+     * \param serializer The serializer to use for output
+     */
     void serialize(tc::prometheus::base_metric_serializer& serializer) const override;
 
 private:

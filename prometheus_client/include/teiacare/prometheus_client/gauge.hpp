@@ -23,10 +23,12 @@
 
 namespace tc::prometheus
 {
-/**
- * @brief Gauge metric that can increase or decrease.
+/*!
+ * \class gauge
+ * \brief Gauge metric that can increase or decrease.
  *
  * Gauges are used for values that can go up and down (e.g., memory usage, active connections).
+ * The value can be set to any value, incremented, or decremented.
  *
  * Thread-safety:
  * - All methods are thread-safe and can be called from multiple threads simultaneously
@@ -36,13 +38,46 @@ namespace tc::prometheus
 class gauge : public tc::prometheus::base_metric
 {
 public:
+    /*!
+     * \brief Construct a new gauge metric
+     * \param name The gauge name
+     * \param labels Optional labels for the gauge
+     */
     explicit gauge(std::string name, tc::prometheus::labels labels = {});
 
+    /*!
+     * \brief Set the gauge to a specific value
+     * \param v The value to set
+     */
     void set(double v) noexcept;
+
+    /*!
+     * \brief Increment the gauge by a given amount
+     * \param amount The amount to increment (default: 1.0)
+     */
     void inc(double amount = 1.0) noexcept;
+
+    /*!
+     * \brief Decrement the gauge by a given amount
+     * \param amount The amount to decrement (default: 1.0)
+     */
     void dec(double amount = 1.0) noexcept;
+
+    /*!
+     * \brief Get the current gauge value
+     * \return The current gauge value
+     */
     double get() const noexcept;
+
+    /*!
+     * \brief Reset the gauge to zero
+     */
     void reset() override;
+
+    /*!
+     * \brief Serialize the gauge using the provided serializer
+     * \param serializer The serializer to use for output
+     */
     void serialize(tc::prometheus::base_metric_serializer& serializer) const override;
 
 private:

@@ -1,3 +1,29 @@
+// Copyright 2025 TeiaCare
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*!
+ * \file example_counter.cpp
+ * \brief Example demonstrating Prometheus metrics usage.
+ *
+ * This example shows how to:
+ * - Create a registry to manage metrics
+ * - Define counter and gauge metric families
+ * - Add metrics with different label combinations
+ * - Increment counters and update gauges
+ * - Serialize metrics to Prometheus exposition format
+ */
+
 #include <teiacare/prometheus_client/counter.hpp>
 #include <teiacare/prometheus_client/gauge.hpp>
 #include <teiacare/prometheus_client/labels.hpp>
@@ -8,6 +34,12 @@
 #include <iostream>
 #include <thread>
 
+/*!
+ * \brief Main function demonstrating Prometheus client library usage.
+ *
+ * Simulates an HTTP server with various metrics including request counters,
+ * database queries, cache hits/misses, and active connections.
+ */
 int main(int, char**)
 {
     using namespace tc::prometheus;
@@ -17,8 +49,7 @@ int main(int, char**)
     // Create a registry to manage all metrics
     auto registry = std::make_shared<tc::prometheus::registry>();
 
-    // 1. Create counter metric family for HTTP requests
-    // This simulates an HTTP server tracking requests
+    // Create counter metric family for HTTP requests
     auto http_requests_family = registry->create_counter(
         "http_requests_total",
         "Total number of HTTP requests received");
@@ -36,7 +67,7 @@ int main(int, char**)
                                                                  {"endpoint", "/api/users"},
                                                                  {"status", "500"}});
 
-    // 2. Create additional metrics to show a complete monitoring setup
+    // Create counter for database queries
     auto database_queries_family = registry->create_counter(
         "database_queries_total",
         "Total number of database queries executed");
@@ -44,6 +75,7 @@ int main(int, char**)
     auto database_queries = database_queries_family->add_metric({{"operation", "SELECT"},
                                                                  {"table", "users"}});
 
+    // Create counters for cache statistics
     auto cache_hits_family = registry->create_counter(
         "cache_hits_total",
         "Total number of cache hits");
@@ -56,7 +88,7 @@ int main(int, char**)
 
     auto cache_misses = cache_misses_family->add_metric({{"cache_type", "redis"}});
 
-    // 3. Also create some gauge metrics to show different metric types
+    // Create gauge for active connections (can increase or decrease)
     auto active_connections_family = registry->create_gauge(
         "active_connections",
         "Number of currently active connections");
@@ -64,11 +96,11 @@ int main(int, char**)
     auto active_connections = active_connections_family->add_metric({});
 
     std::cout << "Created all metric families and metrics" << std::endl;
-    std::cout << std::endl;
-    std::cout << "Simulating application traffic..." << std::endl;
+
+    // Simulate application traffic with various metric updates
+    std::cout << "\nSimulating application traffic..." << std::endl;
     for (int i = 0; i < 100; ++i)
     {
-        // Simulate HTTP requests
         if (i % 10 == 0)
         {
             // Simulate error every 10th request
@@ -102,17 +134,14 @@ int main(int, char**)
             std::cout << "Handled GET request " << (i + 1) << std::endl;
         }
 
-        // Update gauge metric to simulate varying active connections
+        // Update gauge to simulate varying active connections
         active_connections->set(10 + (i % 20));
 
-        // Small delay to make it more realistic
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
-    std::cout << std::endl
-              << "=== Final Metrics Report ===" << std::endl;
-
-    // 4. Show individual metric values
+    // Display individual metric values
+    std::cout << "\n=== Final Metrics Report ===" << std::endl;
     std::cout << "HTTP GET 200 requests: " << http_requests_get->get() << std::endl;
     std::cout << "HTTP POST 201 requests: " << http_requests_post->get() << std::endl;
     std::cout << "HTTP GET 500 errors: " << http_requests_error->get() << std::endl;
@@ -121,17 +150,16 @@ int main(int, char**)
     std::cout << "Cache misses: " << cache_misses->get() << std::endl;
     std::cout << "Active connections: " << active_connections->get() << std::endl;
 
-    std::cout << std::endl
-              << "=== Prometheus Exposition Format ===" << std::endl;
+    // Serialize all metrics to Prometheus exposition format
+    std::cout << "\n=== Prometheus Exposition Format ===" << std::endl;
     std::cout << "This is the format that Prometheus server would scrape:" << std::endl;
     std::cout << std::endl;
 
-    // 5. Serialize all metrics in Prometheus exposition format
-    // This demonstrates how metric families group related metrics together
     std::string prometheus_output = registry->serialize();
     std::cout << prometheus_output << std::endl;
 
-    std::cout << "=== Analysis ===" << std::endl;
+    // Summary of key concepts
+    std::cout << "\n=== Analysis ===" << std::endl;
     std::cout << "Notice how:" << std::endl;
     std::cout << "1. All HTTP request counters are grouped under 'http_requests_total' family" << std::endl;
     std::cout << "2. Different label combinations create separate time series" << std::endl;

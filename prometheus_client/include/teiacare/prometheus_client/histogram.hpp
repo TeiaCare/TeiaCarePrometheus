@@ -24,11 +24,13 @@
 
 namespace tc::prometheus
 {
-/**
- * @brief Histogram metric for sampling observations into buckets.
+/*!
+ * \class histogram
+ * \brief Histogram metric for sampling observations into buckets.
  *
  * Histograms are used to track distributions of values (e.g., request durations, response sizes).
  * Each observation is counted into configured buckets, allowing calculation of quantiles.
+ * The histogram tracks the sum of all observations and the total count.
  *
  * Thread-safety:
  * - All methods are thread-safe and can be called from multiple threads simultaneously
@@ -38,16 +40,62 @@ namespace tc::prometheus
 class histogram : public tc::prometheus::base_metric
 {
 public:
+    /*!
+     * \brief Construct a new histogram metric
+     * \param name The histogram name
+     * \param labels Optional labels for the histogram
+     * \param bounds The bucket boundaries (default: exponential buckets from 0.005 to 10)
+     *
+     * Buckets define ranges for observations. For example, bounds {1, 2, 5} creates buckets:
+     * (-inf, 1], (1, 2], (2, 5], (5, +inf)
+     */
     explicit histogram(std::string name,
                        tc::prometheus::labels labels = {},
                        std::vector<double> bounds = default_buckets());
 
+    /*!
+     * \brief Record an observation
+     * \param value The value to observe
+     *
+     * The value is added to the appropriate bucket(s), the total count, and the sum.
+     */
     void observe(double value);
+
+    /*!
+     * \brief Get the bucket boundaries
+     * \return Vector of bucket boundary values
+     */
     const std::vector<double>& bounds() const noexcept;
+
+    /*!
+     * \brief Get the bucket counts
+     * \return Vector of atomic counters for each bucket
+     */
     const std::vector<std::atomic<uint64_t>>& counts() const noexcept;
+
+    /*!
+     * \brief Get the total number of observations
+     * \return The total count of all observations
+     */
     uint64_t count() const noexcept;
+
+    /*!
+     * \brief Get the sum of all observed values
+     * \return The sum of all observations
+     */
     double sum() const noexcept;
+
+    /*!
+     * \brief Reset the histogram to its initial state
+     *
+     * Clears all bucket counts, total count, and sum.
+     */
     void reset() override;
+
+    /*!
+     * \brief Serialize the histogram using the provided serializer
+     * \param serializer The serializer to use for output
+     */
     void serialize(tc::prometheus::base_metric_serializer& serializer) const override;
 
 private:

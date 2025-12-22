@@ -26,16 +26,52 @@ namespace tc::prometheus
 {
 class base_metric_serializer;
 
+/*!
+ * \class base_metric_family
+ * \brief Abstract base class for metric families.
+ *
+ * A metric family is a collection of related metrics that share the same name and type,
+ * but differ in their label values. For example, an HTTP request counter might have
+ * different instances for different endpoints and methods.
+ */
 class base_metric_family
 {
 public:
     virtual ~base_metric_family() = default;
+
+    /*!
+     * \brief Serialize all metrics in the family
+     * \param serializer The serializer to use for output
+     */
     virtual void serialize(tc::prometheus::base_metric_serializer& serializer) const = 0;
+
+    /*!
+     * \brief Reset all metrics in the family to their initial state
+     */
     virtual void reset() = 0;
 
+    /*!
+     * \brief Get the metric family name
+     * \return The metric family name
+     */
     virtual const std::string& name() const = 0;
+
+    /*!
+     * \brief Get the metric family help text
+     * \return The help text describing the metric family
+     */
     virtual const std::string& help() const = 0;
+
+    /*!
+     * \brief Get the metric type as a string
+     * \return The metric type (e.g., "counter", "gauge", "histogram", "summary")
+     */
     virtual const std::string& type() const = 0;
+
+    /*!
+     * \brief Get all metrics in the family
+     * \return Vector of shared pointers to all metrics in the family
+     */
     virtual const std::vector<std::shared_ptr<tc::prometheus::base_metric>>& metrics() const = 0;
 };
 

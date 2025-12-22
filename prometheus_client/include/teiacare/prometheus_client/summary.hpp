@@ -25,11 +25,13 @@
 
 namespace tc::prometheus
 {
-/**
- * @brief Summary metric for calculating quantiles over a sliding window.
+/*!
+ * \class summary
+ * \brief Summary metric for calculating quantiles over a sliding window.
  *
  * Summaries track observations and calculate quantiles (e.g., median, 95th percentile).
- * Unlike histograms, quantiles are calculated on the client side.
+ * Unlike histograms, quantiles are calculated on the client side from the actual observations.
+ * The summary also tracks the sum and count of all observations.
  *
  * Thread-safety:
  * - All methods are thread-safe and can be called from multiple threads simultaneously
@@ -41,17 +43,67 @@ namespace tc::prometheus
 class summary : public tc::prometheus::base_metric
 {
 public:
+    /*!
+     * \brief Construct a new summary metric
+     * \param name The summary name
+     * \param labels Optional labels for the summary
+     * \param quantiles The quantiles to calculate (default: 0.5, 0.9, 0.99)
+     * \param max_observations Maximum number of observations to keep (default: 10000)
+     *
+     * Quantiles should be values between 0 and 1. For example, 0.5 represents the median,
+     * 0.95 represents the 95th percentile.
+     */
     explicit summary(std::string name,
                      tc::prometheus::labels labels = {},
                      std::vector<double> quantiles = default_quantiles(),
                      size_t max_observations = 10000);
 
+    /*!
+     * \brief Record an observation
+     * \param value The value to observe
+     *
+     * The value is added to the observation list, total count, and sum.
+     * If max_observations is exceeded, the oldest observations are removed.
+     */
     void observe(double value);
+
+    /*!
+     * \brief Get all observations sorted in ascending order
+     * \return Vector of sorted observations
+     *
+     * This method creates a copy of the observations and sorts them.
+     */
     std::vector<double> sorted_observations() const;
+
+    /*!
+     * \brief Get the configured quantiles
+     * \return Vector of quantile values to calculate
+     */
     const std::vector<double>& quantiles_list() const noexcept;
+
+    /*!
+     * \brief Get the total number of observations
+     * \return The total count of all observations
+     */
     uint64_t count() const noexcept;
+
+    /*!
+     * \brief Get the sum of all observed values
+     * \return The sum of all observations
+     */
     double sum() const noexcept;
+
+    /*!
+     * \brief Reset the summary to its initial state
+     *
+     * Clears all observations, total count, and sum.
+     */
     void reset() override;
+
+    /*!
+     * \brief Serialize the summary using the provided serializer
+     * \param serializer The serializer to use for output
+     */
     void serialize(tc::prometheus::base_metric_serializer& serializer) const override;
 
 private:

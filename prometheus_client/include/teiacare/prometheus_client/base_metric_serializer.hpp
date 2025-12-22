@@ -29,15 +29,46 @@ class summary;
 class base_metric;
 class base_metric_family;
 
+/*!
+ * \class base_metric_serializer
+ * \brief Abstract base class for metric serializers.
+ *
+ * Serializers convert metric data into specific output formats (e.g., Prometheus text format).
+ * This class defines the interface for serializing different metric types and metric families.
+ */
 class base_metric_serializer
 {
 public:
     virtual ~base_metric_serializer() = default;
 
+    /*!
+     * \brief Serialize a metric family
+     * \param metric_family The metric family to serialize
+     */
     virtual void serialize(const tc::prometheus::base_metric_family& metric_family) = 0;
+
+    /*!
+     * \brief Serialize a counter metric
+     * \param counter The counter metric to serialize
+     */
     virtual void serialize(const tc::prometheus::counter& counter) = 0;
+
+    /*!
+     * \brief Serialize a gauge metric
+     * \param gauge The gauge metric to serialize
+     */
     virtual void serialize(const tc::prometheus::gauge& gauge) = 0;
+
+    /*!
+     * \brief Serialize a histogram metric
+     * \param histogram The histogram metric to serialize
+     */
     virtual void serialize(const tc::prometheus::histogram& histogram) = 0;
+
+    /*!
+     * \brief Serialize a summary metric
+     * \param summary The summary metric to serialize
+     */
     virtual void serialize(const tc::prometheus::summary& summary) = 0;
 };
 

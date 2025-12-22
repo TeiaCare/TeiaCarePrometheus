@@ -22,16 +22,53 @@
 
 namespace tc::prometheus
 {
+/*!
+ * \class base_metric
+ * \brief Abstract base class for all Prometheus metric types.
+ *
+ * This class provides the common interface and data members for all metric types
+ * (counter, gauge, histogram, summary). Each metric has a name and optional labels
+ * that uniquely identify it.
+ */
 class base_metric
 {
 public:
+    /*!
+     * \brief Construct a new base metric
+     * \param name The metric name
+     * \param labels Optional labels for the metric
+     *
+     * The metric name should follow Prometheus naming conventions (alphanumeric with underscores).
+     */
     explicit base_metric(std::string name, tc::prometheus::labels labels);
+
     virtual ~base_metric() = default;
 
+    /*!
+     * \brief Serialize the metric using the provided serializer
+     * \param serializer The serializer to use for output
+     *
+     * This method is implemented by derived classes to serialize their specific metric data.
+     */
     virtual void serialize(tc::prometheus::base_metric_serializer& serializer) const = 0;
+
+    /*!
+     * \brief Reset the metric to its initial state
+     *
+     * This method is implemented by derived classes to reset their specific metric values.
+     */
     virtual void reset() = 0;
 
+    /*!
+     * \brief Get the metric name
+     * \return The metric name
+     */
     const std::string& name() const noexcept;
+
+    /*!
+     * \brief Get the metric labels
+     * \return The metric labels
+     */
     const tc::prometheus::labels& labels() const noexcept;
 
 protected:

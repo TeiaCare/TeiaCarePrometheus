@@ -27,26 +27,92 @@
 
 namespace tc::prometheus
 {
+/*!
+ * \class metric_family
+ * \brief Template class for managing a family of metrics of the same type.
+ * \tparam MetricT The metric type (counter, gauge, histogram, or summary)
+ *
+ * A metric family groups related metrics that share the same name and type but
+ * differ in their label values. This class provides thread-safe operations for
+ * adding and retrieving metrics within the family.
+ *
+ * Thread-safety:
+ * - All methods are thread-safe and can be called from multiple threads simultaneously
+ * - Metrics can be added or retrieved concurrently
+ */
 template <typename MetricT>
 class metric_family : public tc::prometheus::base_metric_family
 {
     static_assert(std::is_base_of_v<tc::prometheus::base_metric, MetricT>);
 
 public:
+    /*!
+     * \brief Construct a new metric family
+     * \param name The metric family name
+     * \param help Help text describing the metric family
+     */
     explicit metric_family(std::string name, std::string help);
 
-    // template <typename... Args>
-    std::shared_ptr<MetricT> add_metric(tc::prometheus::labels labels); // , Args&&... args
+    /*!
+     * \brief Add a new metric to the family
+     * \param labels The labels for the new metric
+     * \return Shared pointer to the newly created metric
+     *
+     * Creates a new metric instance with the given labels and adds it to the family.
+     */
+    std::shared_ptr<MetricT> add_metric(tc::prometheus::labels labels);
+
+    /*!
+     * \brief Get an existing metric from the family
+     * \param labels The labels of the metric to retrieve
+     * \return Shared pointer to the metric
+     *
+     * Throws std::runtime_error if no metric with the given labels exists.
+     */
     std::shared_ptr<MetricT> get_metric(tc::prometheus::labels labels);
 
+    /*!
+     * \brief Serialize all metrics in the family
+     * \param serializer The serializer to use for output
+     */
     void serialize(tc::prometheus::base_metric_serializer& serializer) const override;
+
+    /*!
+     * \brief Reset all metrics in the family to their initial state
+     */
     void reset() override;
+
+    /*!
+     * \brief Get the metric family name
+     * \return The metric family name
+     */
     const std::string& name() const override;
+
+    /*!
+     * \brief Get the metric family help text
+     * \return The help text describing the metric family
+     */
     const std::string& help() const override;
+
+    /*!
+     * \brief Get the metric type as a string
+     * \return The metric type (e.g., "counter", "gauge", "histogram", "summary")
+     */
     const std::string& type() const override;
+
+    /*!
+     * \brief Get all metrics in the family
+     * \return Vector of shared pointers to all metrics in the family
+     */
     const std::vector<std::shared_ptr<tc::prometheus::base_metric>>& metrics() const override;
 
-    // Add overload for initializer list syntax
+    /*!
+     * \brief Add a new metric using initializer list syntax
+     * \param label_pairs Initializer list of label key-value pairs
+     * \return Shared pointer to the newly created metric
+     *
+     * Example: family.add_metric({{"method", "GET"}, {"endpoint", "/api/users"}})
+     */
     std::shared_ptr<MetricT> add_metric(std::initializer_list<std::pair<std::string, std::string>> label_pairs)
     {
         tc::prometheus::labels ls;
