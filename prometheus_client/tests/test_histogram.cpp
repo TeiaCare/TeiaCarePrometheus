@@ -106,10 +106,10 @@ TEST_F(histogram_test, histogram_with_labels)
 TEST_F(histogram_test, default_buckets)
 {
     tc::prometheus::histogram h("default_hist", {});
-    const auto& bounds = h.bounds();
+    const auto& default_bounds = h.bounds();
 
-    EXPECT_FALSE(bounds.empty());
-    EXPECT_GT(bounds.size(), 0);
+    EXPECT_FALSE(default_bounds.empty());
+    EXPECT_GT(default_bounds.size(), 0);
 }
 
 TEST_F(histogram_test, observe_value_in_correct_bucket)

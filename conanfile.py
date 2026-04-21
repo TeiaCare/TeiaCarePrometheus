@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from conans import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy
 import re
 
 def get_project_version():
@@ -39,7 +40,6 @@ class TeiaCarePrometheusClient(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
-    requires = ""
     generators = "CMakeDeps"
 
     def config_options(self):
@@ -49,6 +49,9 @@ class TeiaCarePrometheusClient(ConanFile):
     def configure(self):
         if self.options.shared:
             del self.options.fPIC
+
+    def layout(self):
+        cmake_layout(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -72,7 +75,7 @@ class TeiaCarePrometheusClient(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="VERSION")
+        copy(self, "VERSION", src=self.source_folder, dst=self.package_folder)
         cmake = CMake(self)
         cmake.install()
 

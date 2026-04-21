@@ -107,15 +107,15 @@ TEST_F(summary_test, summary_with_labels)
 TEST_F(summary_test, default_quantiles)
 {
     tc::prometheus::summary s("default_summary", {});
-    const auto& quantiles = s.quantiles_list();
+    const auto& default_quantiles = s.quantiles_list();
 
-    EXPECT_FALSE(quantiles.empty());
+    EXPECT_FALSE(default_quantiles.empty());
 }
 
 TEST_F(summary_test, max_observations_limit)
 {
-    std::vector<double> quantiles = {0.5};
-    tc::prometheus::summary s("limited", {}, quantiles, 10); // Max 10 observations
+    std::vector<double> local_quantiles = {0.5};
+    tc::prometheus::summary s("limited", {}, local_quantiles, 10); // Max 10 observations
 
     // Add more than max observations
     for (int i = 0; i < 20; ++i)
@@ -131,8 +131,8 @@ TEST_F(summary_test, max_observations_limit)
 
 TEST_F(summary_test, sorted_observations_are_sorted)
 {
-    std::vector<double> quantiles = {0.5};
-    tc::prometheus::summary s("sorted_test", {}, quantiles);
+    std::vector<double> local_quantiles = {0.5};
+    tc::prometheus::summary s("sorted_test", {}, local_quantiles);
 
     s.observe(5.0);
     s.observe(1.0);
@@ -149,8 +149,8 @@ TEST_F(summary_test, sorted_observations_are_sorted)
 
 TEST_F(summary_test, reset_clears_observations)
 {
-    std::vector<double> quantiles = {0.5};
-    tc::prometheus::summary s("reset_test", {}, quantiles);
+    std::vector<double> local_quantiles = {0.5};
+    tc::prometheus::summary s("reset_test", {}, local_quantiles);
 
     s.observe(1.0);
     s.observe(2.0);
