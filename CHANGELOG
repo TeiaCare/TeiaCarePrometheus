@@ -1,4 +1,10 @@
 # TeiaCarePrometheus Changelog
 
-## [1.0.0] - 2025-xx-xx
-### Added
+## [0.1.1] - 2026-04-21
+### Changed
+- Migrate build toolchain to Conan 2 and venvpp2
+- Point scripts submodule to TeiaCare/venvpp2
+- Bump Windows MSVC profile to compiler.version=194
+### Fixed
+- MSVC C4458 variable shadowing in histogram and summary tests
+- Remove empty `requires` to fix `conan create` in Conan 2
