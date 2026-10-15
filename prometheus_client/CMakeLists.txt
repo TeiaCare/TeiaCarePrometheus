@@ -4,7 +4,7 @@ add_library(teiacare::prometheus_client ALIAS ${TARGET_NAME})
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/version.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 
 set(TARGET_HEADERS
@@ -32,7 +32,7 @@ set(TARGET_SOURCES
     src/metric_serializer.cpp
     src/registry.cpp
     src/summary.cpp
-    src/version.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 )
 
 target_compile_features(${TARGET_NAME} PUBLIC cxx_std_20)
