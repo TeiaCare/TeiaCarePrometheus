@@ -1,5 +1,14 @@
 # TeiaCarePrometheus Changelog
 
+## [0.1.2] - 2026-10-15
+### Fixed
+- One Conan recipe revision per release: version.cpp is generated in the build directory instead of the source tree
+- No CRLF conversion on Windows checkouts (the Windows jobs exported a different recipe)
+- Remove the stale generated src/version.cpp from the repository
+### Changed
+- CD deploys only on v* tags and uploads only teiacare_prometheus_client/<version>, never "*"
+- CI resolves third-party Conan 2 packages from teiacare_conan2; teiacare serves only teiacare_*
+
 ## [0.1.1] - 2026-04-21
 ### Changed
 - Migrate build toolchain to Conan 2 and venvpp2
